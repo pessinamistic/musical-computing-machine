@@ -1,7 +1,7 @@
 package com.lucipurr.sdk.core.model;
 
 import jakarta.persistence.*;
-import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,9 +46,13 @@ public class User implements UserDetails {
   @Builder.Default
   private Set<String> roles = new HashSet<>();
 
-  @CreationTimestamp private Duration createdAt;
+  @Column(name = "created_at", columnDefinition = "TIMESTAMP")
+  @CreationTimestamp
+  private Instant createdAt;
 
-  @UpdateTimestamp private Duration updatedAt;
+  @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
+  @UpdateTimestamp
+  private Instant updatedAt;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,28 +1,26 @@
 package com.lucipurr.sdk.auth.model;
 
 import com.lucipurr.sdk.core.model.User;
-import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
-import lombok.Builder;
 
-@Builder
 public record UserDto(
     String id,
     String email,
     String username,
     Set<String> roles,
     boolean enabled,
-    Duration createdAt,
-    Duration updatedAt) {
+    Instant createdAt,
+    Instant updatedAt) {
+
   public static UserDto from(User user) {
-    return UserDto.builder()
-        .id(user.getId().toString())
-        .email(user.getEmail())
-        .username(user.getUsername())
-        .roles(user.getRoles())
-        .enabled(user.isEnabled())
-        .createdAt(user.getCreatedAt())
-        .updatedAt(user.getUpdatedAt())
-        .build();
+    return new UserDto(
+        user.getId().toString(),
+        user.getEmail(),
+        user.getUsername(),
+        user.getRoles(),
+        user.isEnabled(),
+        user.getCreatedAt(),
+        user.getUpdatedAt());
   }
 }

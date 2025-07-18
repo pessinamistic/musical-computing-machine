@@ -1,4 +1,4 @@
-package com.lucipurr.sdk.auth.model;
+package com.lucipurr.sdk.auth.model.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,4 +12,5 @@ public record RegisterRequest(
         @Size(min = 8, message = "Password must be at least 8 characters long")
         String password,
     @NotBlank(message = "Email cannot be blank") @Email(message = "Email should be valid")
-        String email) {}
+        String email)
+    implements UserCredentialsRequest {}

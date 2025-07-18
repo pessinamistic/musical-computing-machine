@@ -1,21 +1,27 @@
 package com.lucipurr.sdk.auth.service;
 
-import com.lucipurr.sdk.auth.model.AuthRequest;
-import com.lucipurr.sdk.auth.model.AuthResponse;
-import com.lucipurr.sdk.auth.model.RegisterRequest;
+import com.lucipurr.sdk.auth.exception.EmailAlreadyExistsException;
+import com.lucipurr.sdk.auth.exception.UserAlreadyExistsException;
+import com.lucipurr.sdk.auth.exception.UserNotFoundException;
+import com.lucipurr.sdk.auth.model.UserDto;
+import com.lucipurr.sdk.auth.model.request.AuthRequest;
+import com.lucipurr.sdk.auth.model.request.RegisterRequest;
+import com.lucipurr.sdk.auth.model.response.LoginResponse;
+import com.lucipurr.sdk.auth.model.response.SignupResponse;
 import com.lucipurr.sdk.core.model.User;
 import com.lucipurr.sdk.core.repository.UserRepository;
-
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthServiceImpl implements AuthService
-{
+public class AuthServiceImpl implements AuthService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -33,33 +39,64 @@ public class AuthServiceImpl implements AuthService
     this.authenticationManager = authenticationManager;
   }
 
-  @Override
-  public AuthResponse register(RegisterRequest request) {
-    var user =
-        User.builder()
-            .username(request.username())
-            .password(passwordEncoder.encode(request.password()))
-            .email(request.email())
-            .roles(Set.of("USER"))
-            .build();
+  @Transactional
+  public SignupResponse register(RegisterRequest request) {
+    validations(request);
 
-    userRepository.save(user);
+    // Normalize email to lowercase
+    String normalizedEmail = request.email().trim().toLowerCase();
 
-    var jwtToken = jwtService.generateToken(user);
-Instant expirationTime = jwtService.getExpirationTime();
-return AuthResponse.of(
-    jwtToken, user.getUsername(), expirationTime.getEpochSecond());
+    User.UserBuilder userBuilder = User.builder()
+        .username(request.username())
+        .email(normalizedEmail)
+        .password(passwordEncoder.encode(request.password()))
+        .roles(Set.of("USER"));
+
+    // Optionally set audit fields if present
+    // userBuilder.createdAt(Instant.now());
+
+    User user = userBuilder.build();
+    User savedUser = userRepository.save(user);
+
+    String jwtToken = jwtService.generateToken(savedUser);
+    Instant expiresAt = jwtService.getExpirationTime();
+
+    return SignupResponse.of(savedUser, jwtToken, expiresAt);
   }
 
-  @Override
-  public AuthResponse authenticate(AuthRequest request) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+  public LoginResponse authenticate(AuthRequest request) {
+    // Make sure your UserDetailsService loads users by email, not username!
+    try {
+      authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    } catch (Exception ex) {
+      // Propagate authentication failure as a custom exception
+      throw new com.lucipurr.sdk.auth.exception.AuthException("Invalid credentials");
+    }
 
-    var user = userRepository.findByUsername(request.username()).orElseThrow();
+    User user =
+        userRepository
+            .findByEmail(request.email())
+            .orElseThrow(() -> new UserNotFoundException(request.email()));
 
-    var jwtToken = jwtService.generateToken(user);
-    return AuthResponse.of(
-        jwtToken, user.getUsername(), jwtService.getExpirationTime().getEpochSecond());
+    String jwtToken = jwtService.generateToken(user);
+
+    return new LoginResponse(
+        jwtToken,
+        UserDto.from(user),
+        jwtService.getExpirationTime(),
+        user.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toSet()));
+  }
+
+  private void validations(RegisterRequest request) {
+    if (userRepository.existsByEmail(request.email())) {
+      throw new EmailAlreadyExistsException(request.email());
+    }
+
+    if (userRepository.existsByUsername(request.username())) {
+      throw new UserAlreadyExistsException(request.username());
+    }
   }
 }
