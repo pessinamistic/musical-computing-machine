@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.exception;
 
 public class UserNotFoundException extends RuntimeException {

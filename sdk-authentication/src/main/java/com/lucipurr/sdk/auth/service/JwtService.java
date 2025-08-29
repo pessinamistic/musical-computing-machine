@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.service;
 
 import com.auth0.jwt.JWT;
@@ -5,7 +6,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -58,13 +58,14 @@ public class JwtService {
       return true;
     }
   }
+
   public String extractUsername(String token) {
     return validateTokenAndGetUsername(token);
   }
 
-//  public Duration getExpirationTime() {
-//    return Duration.of(expirationMinutes, ChronoUnit.MINUTES);
-//  }
+  //  public Duration getExpirationTime() {
+  //    return Duration.of(expirationMinutes, ChronoUnit.MINUTES);
+  //  }
 
   public Instant getExpirationTime() {
     return Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES);

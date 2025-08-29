@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.service;
 
 import com.lucipurr.sdk.core.repository.UserRepository;
@@ -15,10 +16,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     this.userRepository = userRepository;
   }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-    }
-
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    return userRepository
+        .findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+  }
 }

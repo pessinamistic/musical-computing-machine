@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.core.model;
 
 import jakarta.persistence.*;

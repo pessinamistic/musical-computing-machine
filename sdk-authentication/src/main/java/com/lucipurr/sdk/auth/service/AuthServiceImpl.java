@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.service;
 
 import com.lucipurr.sdk.auth.exception.EmailAlreadyExistsException;
@@ -46,11 +47,12 @@ public class AuthServiceImpl implements AuthService {
     // Normalize email to lowercase
     String normalizedEmail = request.email().trim().toLowerCase();
 
-    User.UserBuilder userBuilder = User.builder()
-        .username(request.username())
-        .email(normalizedEmail)
-        .password(passwordEncoder.encode(request.password()))
-        .roles(Set.of("USER"));
+    User.UserBuilder userBuilder =
+        User.builder()
+            .username(request.username())
+            .email(normalizedEmail)
+            .password(passwordEncoder.encode(request.password()))
+            .roles(Set.of("USER"));
 
     // Optionally set audit fields if present
     // userBuilder.createdAt(Instant.now());

@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.model.response;
 
 public record AuthResponse(String accessToken, String tokenType, long expiresIn, String username)

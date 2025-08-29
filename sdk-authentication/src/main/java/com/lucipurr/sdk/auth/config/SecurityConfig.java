@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.config;
 
 import com.lucipurr.sdk.auth.filter.JwtAuthenticationFilter;

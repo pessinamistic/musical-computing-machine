@@ -1,3 +1,4 @@
+/* (C) Lucipurr 69@420 */
 package com.lucipurr.sdk.auth.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
